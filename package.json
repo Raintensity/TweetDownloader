@@ -1,0 +1,23 @@
+{
+  "name": "tweetdownloader",
+  "version": "0.0.1",
+  "description": "A software to download some tweet.",
+  "main": "index.js",
+  "scripts": {
+    "preview": "node ./tools/test.js",
+    "test": "npm run preview && cd ./.temp/ && electron . && cd ../",
+    "build": "npm run preview && node ./tools/build.js"
+  },
+  "author": "Raintensity",
+  "license": "MIT",
+  "dependencies": {
+    "js-sha256": "^0.9.0",
+    "nedb": "^1.8.0"
+  },
+  "devDependencies": {
+    "fs-extra": "^5.0.0"
+  },
+  "custom": {
+    "title": "TweetDownloader"
+  }
+}

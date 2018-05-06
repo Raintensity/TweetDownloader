@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>TweetDownloader</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="wrapper" class="flex-h">
+<nav id="menu" class="flex-v">
+<p id="menu_add"><svg width="53" height="53" viewbox="-5 -5 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M20 5h10v40H20z"/><path d="M5 20h40v10H5z"/></svg></p>
+<p data-menu="list" class="active"><svg width="55" height="55" viewbox="-5 -5 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M10 11h30v6H10zm0 11h30v6H10zm0 11h15v6H10z"/></svg></p>
+<p data-menu="search"><svg width="55" height="55" viewbox="-5 -5 60 60" xmlns="http://www.w3.org/2000/svg"><defs><mask id="a"><path fill="#fff" d="M0 0h50v50H0z"/><circle cx="22" cy="22" r="10" fill="#000"/></mask></defs><circle cx="22" cy="22" r="13" mask="url(#a)"/><path transform="rotate(45 25 25)" mask="url(#a)" d="M30 22.5h15v5H30z"/></svg></p>
+<p class="flex-grow"></p>
+<p data-menu="setting"><svg width="55" height="55" viewbox="-5 -5 60 60" xmlns="http://www.w3.org/2000/svg"><defs><mask id="b"><path fill="#fff" d="M0 0h50v50H0z"/><circle cx="25" cy="25" r="8" fill="#000"/></mask></defs><circle cx="25" cy="25" r="15" mask="url(#b)"/><path d="M20 6h10v5H20zm0 33h10v5H20zM6 20h5v10H6zm33 0h5v10h-5zM34.9 8.03l7.07 7.07-3.535 3.536-7.071-7.071zm7.07 26.87l-7.07 7.07-3.536-3.535 7.071-7.071zM15.1 41.97L8.03 34.9l3.535-3.536 7.071 7.071zM8.03 15.1l7.07-7.07 3.536 3.535-7.071 7.071z"/></svg></p>
+<p data-menu="info"><svg width="55" height="55" viewbox="-5 -5 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="25" cy="10" r="5"/><path d="M20 19h10v26H20zm-6 0h6v2h-6z"/><path d="M14 43h22v2H14z"/></svg></p>
+</nav>
+
+<main class="flex-grow">
+<header class="flex-h flex-center">
+<h1 data-area="list" class="flex-grow">Tweet</h1>
+<h1 data-area="search" class="flex-grow hidden">Search</h1>
+<h1 data-area="setting" class="flex-grow hidden">Settings</h1>
+<h1 data-area="info" class="flex-grow hidden">Information</h1>
+<div class="hidden">menu</div>
+</header>
+
+<section data-area="search" class="hidden">
+<h2>検索</h2>
+<form action="#" id="search_form">
+<div class="flex-h flex-center"><p><label for="q">キーワード</label></p><p><input type="text" id="q"></p><p><input type="submit" value="検索"></p></div>
+</form>
+</section>
+
+<section data-area="list search">
+<table>
+<colgroup span="1" style="width:150px;">
+<colgroup span="1" style="width:150px;">
+<colgroup span="1">
+<colgroup span="1" style="width:190px;">
+<thead>
+<tr><th>ユーザー名</th><th>ユーザーID</th><th>ツイート</th><th>ツイート日時</th></tr>
+</thead>
+<tbody id="list">
+</tbody>
+</table>
+</section>
+
+<section data-area="settings" class="hidden">
+<h2>開発用ツール</h2>
+<div class="flex-h">
+<p><input type="button" id="tool_reloadDB" value="DB再読み込み"></p>
+<p><input type="button" id="tool_reload" value="webContentsのリロード" form="form_dummy"></p>
+<p><input type="button" id="tool_devtools" value="開発者ツールの切り替え" form="form_dummy"></p>
+</div>
+</section>
+
+<section data-area="info" class="hidden">
+<h2>TweetDownloader</h2>
+<p id="version"></p>
+<p>Developed by <a href="https://blog.usx.jp/" target="_blank">Raintensity</a>.</p>
+</section>
+
+<section data-area="info" class="license hidden" id="license">
+</section>
+
+</main>
+</div>
+
+<div id="modal" class="hidden">
+<div id="add_window" class="hidden">
+<h2>ツイートの追加</h2>
+<form action="#" id="add_form">
+<div class="flex-h flex-center"><p><label for="t">ツイートURL</label></p><p><input type="text" id="t"></p><p><input type="submit" value="追加"></p><p><input type="button" id="add_paste" value="貼り付け"></p></div>
+</form>
+</div>
+
+<div id="detail" class="hidden">
+<h2>ツイートの詳細</h2>
+<table>
+<tr><th style="width:150px;">ユーザー名</th><td id="detail_name"></td></tr>
+<tr><th>ユーザーID</th><td id="detail_id"></td></tr>
+<tr><th>ツイート</th><td id="detail_tweet"></td></tr>
+<tr><th>ツイートURL</th><td id="detail_url"></td></tr>
+<tr><th>ツイート日時</th><td id="detail_date"></td></tr>
+<tr><th>リンク</th><td id="detail_link"><a href="#">リンク1</a></td></tr>
+<tr><th>関連ツイートURL</th><td id="detail_extra_link"><a href="#">リンク</a></td></tr>
+<tr><th>添付メディア</th><td><div id="detail_media" class="flex-h flex-center"></div></td></tr>
+</table>
+</div>
+
+<p id="loading" class="hidden"><svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 50 50"><path d="M25.251 6.461c-10.318 0-18.683 8.365-18.683 18.683h4.068c0-8.071 6.543-14.615 14.615-14.615V6.461z" fill="#fff"><animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"/></path></svg></p>
+</div>
+
+<div id="notify"></div>
+<form action="#" id="form_dummy" class="hidden"></form>
+<script src="./script.js"></script>
+</body>
+</html>
