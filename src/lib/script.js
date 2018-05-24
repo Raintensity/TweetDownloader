@@ -187,6 +187,27 @@
 		});
 	};
 
+	var remove=dataID=>{
+		db.search({_id:dataID},(err,doc)=>{
+			if(err||doc.length<1){
+				$("loading").classList.add("hidden");
+				$("modal").classList.add("hidden");
+				notify((err)?err.message:"Can't find the tweet.","error");
+				return;
+			}
+			doc=doc[0];
+			for(var i=0;i<doc.__media.length;i++){
+				fs.unlink(process.cwd()+"/data/media/"+doc.__media[i],err=>{
+					if(err)notify(err.message,"error");
+				});
+			}
+		});
+		db.remove(dataID,err=>{
+			if(err)notify(err.message,"error");
+			else load();
+		});
+	};
+
 	document.addEventListener("DOMContentLoaded",function(){
 		$("version").textContent=package.custom.title+" "+package.version;
 		Array.prototype.forEach.call($("menu").children,item=>{
@@ -276,10 +297,7 @@
 				menu.append(new MenuItem({label:"ブラウザで開く (&B)",click:()=>shell.openExternal(uri)}));
 				menu.append(new MenuItem({label:"リンクアドレスをコピー (&E)",click:()=>clipboard.writeText(uri)}));
 			}
-			if(eFlag.includes("data"))menu.append(new MenuItem({label:"削除 (&R)",click:()=>db.remove(dataID,err=>{
-				if(err)notify(err.message,"error");
-				else load();
-			})}));
+			if(eFlag.includes("data"))menu.append(new MenuItem({label:"削除 (&R)",click:()=>remove(dataID)}));
 			if(menu.items.length!==0&&(eFlag.includes("input_text")||eFlag.includes("selected")))menu.append(new MenuItem({type:"separator"}));
 			if(eFlag.includes("input_text")&&!eFlag.includes("input_pass"))menu.append(new MenuItem({label:"切り取り (&T)",role:"cut",accelerator:"CommandOrControl+X"}));
 			if((eFlag.includes("input_text")||eFlag.includes("selected"))&&!eFlag.includes("input_pass"))menu.append(new MenuItem({label:"コピー (&C)",role:"copy",accelerator:"CommandOrControl+C"}));
