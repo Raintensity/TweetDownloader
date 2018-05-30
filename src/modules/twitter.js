@@ -1,17 +1,17 @@
 const https=require("https");
 
-var twitter={
+const twitter={
 	_token:null,
 	$get:function(options,type="json"){
 		return new Promise((resolve,reject)=>{
 			https.get(options,res=>{
 				if(type=="json"){
-					var buffer="";
+					let buffer="";
 					res.setEncoding("utf-8");
 					res.on("data",chunk=>buffer+=chunk);
 					res.on("end",()=>resolve(JSON.parse(buffer)));
 				}else if(type=="binary"){
-					var buffer=[];
+					let buffer=[];
 					res.on("data",chunk=>buffer.push(chunk));
 					res.on("end",()=>resolve(Buffer.concat(buffer)));
 				}
@@ -24,7 +24,7 @@ var twitter={
 		}catch(e){
 			throw e;
 		}
-		var options={
+		let options={
 			hostname:"api.twitter.com",
 			path:"/1.1/statuses/show.json?id="+tid,
 			headers:{
@@ -39,13 +39,13 @@ var twitter={
 		});
 	},
 	pic:function(mediaObj){
-		var medias=[];
-		for(var i=0;i<mediaObj.length;i++){
-			var url=null;
+		let medias=[];
+		for(let i=0;i<mediaObj.length;i++){
+			let url=null;
 			if(mediaObj[i].type==="photo")url=mediaObj[i].media_url_https+":orig";
 			else if(mediaObj[i].type==="video"||mediaObj[i].type==="animated_gif"){
-				var bitrate=-1;
-				for(var j=0;j<mediaObj[i].video_info.variants.length;j++){
+				let bitrate=-1;
+				for(let j=0;j<mediaObj[i].video_info.variants.length;j++){
 					if(!mediaObj[i].video_info.variants[j].bitrate)continue;
 					if(mediaObj[i].video_info.variants[j].bitrate>bitrate)url=mediaObj[i].video_info.variants[j].url.split("?")[0];
 				}
