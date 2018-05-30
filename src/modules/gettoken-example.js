@@ -1,7 +1,7 @@
 var token="";//bearer token
 
 var getToken=callback=>{
-	callback(null,token);
+	Promise.resolve(token);
 };
 
 module.exports=getToken;

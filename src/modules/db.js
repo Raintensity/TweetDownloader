@@ -4,23 +4,29 @@ function db(dbPath){
 	this.database=new nedb({filename:dbPath,autoload:true});
 };
 
-db.prototype.load=function(callback){
-	this.database.loadDatabase();
-	this.database.find({}).sort({id_str:-1}).exec((err,docs)=>callback(err,docs));
+db.prototype.load=function(){
+	return this.search({});
 };
 
-db.prototype.search=function(key,callback){
-	this.database.loadDatabase();
-	this.database.find(key).sort({id_str:-1}).exec((err,docs)=>callback(err,docs));
+db.prototype.search=function(key){
+	return new Promise((resolve,reject)=>{
+		this.database.loadDatabase();
+		this.database.find(key).sort({id:-1}).exec((err,docs)=>err?reject(err):resolve(docs));
+	});
 };
 
-db.prototype.insert=function(record,callback){
-	this.database.insert(record,err=>callback(err));
+db.prototype.insert=function(record){
+	return new Promise((resolve,reject)=>{
+		this.database.loadDatabase();
+		this.database.insert(record,err=>err?reject(err):resolve());
+	});
 };
 
-db.prototype.remove=function(key,callback){
-	this.database.loadDatabase();
-	this.database.remove({_id:key},{},(err,num)=>callback(err,num));
+db.prototype.remove=function(key){
+	return new Promise((resolve,reject)=>{
+		this.database.loadDatabase();
+		this.database.remove({_id:key},{},(err,num)=>err?reject(err):resolve());
+	});
 };
 
 module.exports=db;
