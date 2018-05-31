@@ -1,8 +1,6 @@
 (function(window){
 	const $=eid=>document.getElementById(eid);
-	const $t=tag=>document.getElementsByTagName(tag);
 	const $q=q=>document.querySelectorAll(q);
-	const $c=e=>document.createElement(e);
 
 	const electron=require("electron");
 	const {remote,clipboard}=electron;
@@ -17,8 +15,6 @@
 	const remoteWeb=remote.getCurrentWebContents();
 
 	const error_type={error:"エラー",message:"通知"};
-	const zero=(x,n)=>(Array(n).join("0")+x).slice(-n);
-	const date_format=dateObj=>dateObj.getFullYear()+"/"+zero(dateObj.getMonth()+1,2)+"/"+zero(dateObj.getDate(),2)+" "+zero(dateObj.getHours(),2)+":"+zero(dateObj.getMinutes(),2)+":"+zero(dateObj.getSeconds(),2);
 	const inputText=["text","search","tel","url","email","password","number"];
 
 	const somewhereClick={
@@ -45,12 +41,12 @@
 	};
 
 	let notify=(msg,type="message")=>{
-		let notify_elem=$c("div");
+		let notify_elem=document.createElement("div");
 		notify_elem.classList.add(type);
 		notify_elem.insertAdjacentHTML("beforeend",template.notify({title:error_type[type],msg:msg}));
 		notify_elem.addEventListener("click",()=>$("notify").removeChild(notify_elem));
 		window.setTimeout(()=>{
-			try {
+			try{
 				$("notify").removeChild(notify_elem);
 			}catch(e){}
 		},5000);
@@ -58,38 +54,17 @@
 	};
 
 	let viewDetail=doc=>{
-		$("detail_name").textContent=doc.user.name;
-		let d_id_link=template.link({href:"https://twitter.com/"+doc.user.screen_name,text:"@"+doc.user.screen_name});
-		$("detail_id").innerHTML=d_id_link;
-		let d_text=doc.full_text?doc.full_text:doc.text;
-		if(doc.entities.media&&doc.entities.media.length>0)d_text=d_text.replace(" "+doc.entities.media[0].url,"");
-		$("detail_tweet").textContent=d_text;
-		let d_url=template.link({href:"https://twitter.com/"+doc.user.screen_name+"/status/"+doc.id_str});
-		$("detail_url").innerHTML=d_url;
-		$("detail_date").textContent=date_format(new Date(doc.created_at));
-		$("detail_link").textContent="";
-		if(doc.entities.urls.length>0){
-			for(let i=0;i<doc.entities.urls.length;i++){
-				let d_link=template.link({href:doc.entities.urls[i].expanded_url});
-				$("detail_link").insertAdjacentHTML("beforeend",d_link);
-				$("detail_link").appendChild($c("br"));
+		let tplObj=template.detail(doc,process.cwd()+"/data/media/");
+		console.log(tplObj)
+		Object.keys(tplObj).forEach(eid=>{
+			if(typeof tplObj[eid]==="function")tplObj[eid]=tplObj[eid]();
+			if(Array.isArray(tplObj[eid])){
+				$(eid).textContent="";
+				for(let i=0;i<tplObj[eid].length;i++)$(eid).appendChild(tplObj[eid][i]);
+			}else{
+				$(eid).innerHTML=tplObj[eid];
 			}
-		}
-		$("detail_extra_link").textContent="";
-		if(doc.in_reply_to_status_id_str){
-			let d_e_link=template.link({href:"https://twitter.com/"+doc.in_reply_to_screen_name+"/status/"+doc.in_reply_to_status_id_str});
-			$("detail_extra_link").insertAdjacentHTML("beforeend",d_e_link);
-		}
-		$("detail_media").textContent="";
-		if(doc.__media)for(var i=0;i<doc.__media.length;i++){
-			var elem=$c("p");
-			var ext=doc.__media[i].split(".").pop();
-			var media=ext==="mp4"?$c("video"):$c("img");
-			if(ext==="mp4")media.controls=true;
-			media.src=process.cwd()+"/data/media/"+doc.__media[i];
-			elem.appendChild(media);
-			$("detail_media").appendChild(elem);
-		}
+		});
 	}
 
 	let detail=async id=>{
@@ -98,7 +73,6 @@
 		try{
 			let doc=await core.getDetail(id);
 			if(doc.length<1)throw new Error("Can't find the tweet.");
-			$("detail").classList.remove("hidden");
 			doc=doc[0];
 			viewDetail(doc);
 
@@ -107,6 +81,7 @@
 				$("modal").classList.add("hidden");
 			});
 
+			$("detail").classList.remove("hidden");
 			$("detail").scrollTop=0;
 		}catch(e){
 			notify(e.message,"error");
@@ -119,7 +94,7 @@
 		if(!docs)return;
 		$("list").textContent="";
 		for(let i=0;i<docs.length;i++){
-			let tr=$c("tr");
+			let tr=document.createElement("tr");
 			tr.setAttribute("data-db",docs[i]._id);
 			tr.insertAdjacentHTML("beforeend",template.list(docs[i]));
 			tr.addEventListener("dblclick",function(e){
@@ -173,7 +148,7 @@
 		$("version").textContent=package.custom.title+" "+package.version;
 		Array.prototype.forEach.call($("menu").children,item=>{
 			if(item.dataset.menu)item.addEventListener("click",e=>{
-				$t("main")[0].scrollTop=0;
+				document.getElementsByTagName("main")[0].scrollTop=0;
 				Array.prototype.forEach.call($q("[data-menu]"),menu=>{
 					if(menu.dataset.menu===item.dataset.menu)menu.classList.add("active");
 					else menu.classList.remove("active");
@@ -207,14 +182,13 @@
 			try{
 				await core.getTweet($("t").value);
 				$("t").value="";
-				$("loading").classList.add("hidden");
 				$("modal").classList.add("hidden");
 				load();
 			}catch(e){
-				$("loading").classList.add("hidden");
 				notify(e.message,"error");
 				$("menu_add").click();
 			}
+			$("loading").classList.add("hidden");
 		});
 		$("add_paste").addEventListener("click",()=>{
 			$("t").value=clipboard.readText();
