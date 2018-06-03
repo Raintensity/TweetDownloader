@@ -3,10 +3,11 @@ const sha256=require("js-sha256");
 
 const nedb=require("./db");
 const parse=require("./parse");
+const settings=require("./settings");
 const twitter=require("./twitter");
 
-const path=process.cwd()+"/data/";
-const db=new nedb(path+"tweet.db");
+const path=settings.get("general.path")||process.cwd()+"/data";
+const db=new nedb(path+"/tweet.db");
 
 const core={
 	getTweet:async function(turl){
@@ -19,10 +20,12 @@ const core={
 			for(let i=0;i<medias.length;i++){
 				let [name,ext]=medias[i].name.split(".");
 				name=sha256(name);
-				fs.writeFileSync(path+"media/"+name+"."+ext,medias[i].data);
+				fs.writeFileSync(path+"/media/"+name+"."+ext,medias[i].data);
 				tweet.__media.push(name+"."+ext);
 			}
 		}
+		let find=await db.search({id_str:tweet.id_str});
+		if(find&&find.length>0)throw new Error("This tweet has already saved.");
 		await db.insert(tweet);
 		return true;
 	},
@@ -31,7 +34,7 @@ const core={
 		if(tweet.length===0)throw new Error("Can't find the tweet on database.");
 		tweet=tweet[0];
 		for(let i=0;i<tweet.__media.length;i++){
-			fs.unlinkSync(path+"media/"+tweet.__media[i]);
+			fs.unlinkSync(path+"/media/"+tweet.__media[i]);
 		}
 		await db.remove(dataID);
 		return true;

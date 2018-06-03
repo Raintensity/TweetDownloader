@@ -314,6 +314,10 @@ input[type="text"]:focus{
 	border:1px solid #55acee;
 }
 
+input[type="text"]:disabled{
+	background-color: #ccd6dd;
+}
+
 input[type="submit"]{
 	background-color: #fff;
 }

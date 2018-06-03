@@ -3,14 +3,16 @@
 	const $q=q=>document.querySelectorAll(q);
 
 	const electron=require("electron");
-	const {remote,clipboard}=electron;
+	const {remote,clipboard,ipcRenderer}=electron;
 	const {Menu,MenuItem}=remote;
 
 	const fs=require("fs");
 	const core=require("../modules/core");
+	const settings=require("../modules/settings");
 	const template=require("./template");
 	const package=require("../package");
 
+	const path=settings.get("general.path")||process.cwd()+"/data";
 	const remoteWindow=remote.getCurrentWindow();
 	const remoteWeb=remote.getCurrentWebContents();
 
@@ -54,8 +56,7 @@
 	};
 
 	let viewDetail=doc=>{
-		let tplObj=template.detail(doc,process.cwd()+"/data/media/");
-		console.log(tplObj)
+		let tplObj=template.detail(doc,path+"/media/");
 		Object.keys(tplObj).forEach(eid=>{
 			if(typeof tplObj[eid]==="function")tplObj[eid]=tplObj[eid]();
 			if(Array.isArray(tplObj[eid])){
@@ -144,6 +145,12 @@
 		$("modal").classList.add("hidden");
 	};
 
+	let updateSettings=e=>{
+		let key=e.target.id.split("-")[1],value=(e.target.value==="")?null:e.target.value;
+		if(e.target.dataset.reboot)ipcRenderer.send("main:sc-settings",{key:key,value:value});
+		else settings.save(key,value);
+	};
+
 	document.addEventListener("DOMContentLoaded",function(){
 		$("version").textContent=package.custom.title+" "+package.version;
 		Array.prototype.forEach.call($("menu").children,item=>{
@@ -172,6 +179,23 @@
 		$("search_form").addEventListener("submit",e=>{
 			e.preventDefault();
 			search();
+		});
+		$("set-general.path-null").addEventListener("change",e=>{
+			$("set-general.path").disabled=e.target.checked;
+			if(e.target.checked)$("set-general.path").value="";
+		});
+		Array.prototype.forEach.call($q("[data-form='settings']"),elem=>{
+			Array.prototype.forEach.call(elem.querySelectorAll("[id^='set-']"),item=>{
+				let name=item.id.split("-")[1],name_chk=item.id.split("-")[2]||null;
+				let value=settings.get(name);
+				if(name_chk!==null&&value===null)item.checked=true;
+				else if(name_chk!==null&&value!==null)item.checked=false;
+				else item.value=value;
+				let evt=document.createEvent("HTMLEvents");
+				evt.initEvent("change",false,true);
+				item.dispatchEvent(evt);
+			});
+			elem.addEventListener("change",updateSettings);
 		});
 		$("add_form").addEventListener("submit",async e=>{
 			e.preventDefault();
@@ -225,7 +249,7 @@
 			}
 			if(eFlag.includes("data"))menu.append(new MenuItem({label:"削除 (&R)",click:()=>remove(dataID)}));
 			if(menu.items.length!==0&&(eFlag.includes("input_text")||eFlag.includes("selected")))menu.append(new MenuItem({type:"separator"}));
-			if(eFlag.includes("input_text")&&!eFlag.includes("input_pass"))menu.append(new MenuItem({label:"切り取り (&T)",role:"cut",accelerator:"CommandOrControl+X"}));
+			if(eFlag.includes("input_text")&&eFlag.includes("selected")&&!eFlag.includes("input_pass"))menu.append(new MenuItem({label:"切り取り (&T)",role:"cut",accelerator:"CommandOrControl+X"}));
 			if((eFlag.includes("input_text")||eFlag.includes("selected"))&&!eFlag.includes("input_pass"))menu.append(new MenuItem({label:"コピー (&C)",role:"copy",accelerator:"CommandOrControl+C"}));
 			if(eFlag.includes("input_text")||eFlag.includes("input_pass"))menu.append(new MenuItem({label:"貼り付け (&P)",role:"paste",accelerator:"CommandOrControl+V"}));
 			if(eFlag.includes("selected")&&!eFlag.includes("input_pass"))menu.append(new MenuItem({label:"\""+selection+"\" をGoogle検索 (&S)",click:()=>shell.openExternal("https://www.google.co.jp/search?q="+encodeURIComponent(selection))}));

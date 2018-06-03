@@ -1,32 +1,18 @@
 const electron=require("electron");
-const {app,dialog,shell}=electron;
+const {app,dialog,shell,ipcMain}=electron;
 const fs=require("fs");
+require("./init")();
 
+const settings=require("./modules/settings");
 const package=require("./package");
 
-try{
-	fs.accessSync(process.cwd()+"/data",fs.constants.F_OK);
-}catch(e){
-	fs.mkdirSync(process.cwd()+"/data");
-}
+const path=settings.get("general.path")||process.cwd()+"/data";
+let scSettings=[];
 
-try{
-	fs.accessSync(process.cwd()+"/data/app",fs.constants.F_OK);
-}catch(e){
-	fs.mkdirSync(process.cwd()+"/data/app");
-}
-
-try{
-	fs.accessSync(process.cwd()+"/data/media",fs.constants.F_OK);
-}catch(e){
-	fs.mkdirSync(process.cwd()+"/data/media");
-}
-
-app.setPath("appData",process.cwd()+"/data/app");
-app.setPath("userData",process.cwd()+"/data/app");
+app.setPath("appData",path+"/app");
+app.setPath("userData",path+"/app");
 
 let win=null;
-
 app.on("ready",()=>{
 	win=new electron.BrowserWindow({
 		width:1024,
@@ -36,15 +22,22 @@ app.on("ready",()=>{
 	win.setMenu(null);
 	win.on("closed",()=>{
 		win=null;
+		if(scSettings.length>0){
+			for(let i=0;i<scSettings.length;i++){
+				settings.save(scSettings[i].key,scSettings[i].value);
+			}
+		}
 	});
 	win.webContents.on("new-window",(e,url)=>{
 		e.preventDefault();
 		shell.openExternal(url);
 	});
+	ipcMain.on("main:sc-settings",(evt,arg)=>{
+		console.log(arg);
+		scSettings.push(arg);
+	});
 	win.loadURL(__dirname+"/lib/main.html");
 	//win.webContents.openDevTools();
 });
 
-app.on("window-all-closed",()=>{
-	app.quit();
-});
+app.on("window-all-closed",()=>app.quit());

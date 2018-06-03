@@ -47,6 +47,17 @@
 </section>
 
 <section data-area="settings" class="hidden">
+<h2>全般設定</h2>
+<form action="#" data-form="settings">
+<table>
+<tbody>
+<tr><th>ファイルの保存先</th><td><label><input type="checkbox" name="set-general.path-null" id="set-general.path-null" value="" data-reboot="true" checked>デフォルトの保存先</label><br><input type="text" name="set-general.path" id="set-general.path" data-reboot="true" placeholder="ファイルパス" disabled></td></tr>
+</tbody>
+</table>
+</form>
+</section>
+
+<section data-area="settings" class="hidden">
 <h2>開発用ツール</h2>
 <div class="flex-h">
 <p><input type="button" id="tool_reloadDB" value="DB再読み込み"></p>
