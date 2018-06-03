@@ -66,6 +66,12 @@
 				$(eid).innerHTML=tplObj[eid];
 			}
 		});
+		Array.prototype.forEach.call($("detail_media").getElementsByTagName("img"),elem=>{
+			elem.addEventListener("click",e=>ipcRenderer.send("main:media",elem.src));
+		});
+		Array.prototype.forEach.call($("detail_media").getElementsByTagName("video"),elem=>{
+			elem.addEventListener("click",e=>ipcRenderer.send("main:media",elem.src));
+		});
 	}
 
 	let detail=async id=>{

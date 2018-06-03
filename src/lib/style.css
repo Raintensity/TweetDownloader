@@ -212,6 +212,7 @@ div#modal{
 	max-width: 100%;
 	height: auto;
 	max-height: 300px;
+	cursor: pointer;
 }
 
 div#detail_media>p{
