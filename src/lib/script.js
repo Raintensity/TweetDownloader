@@ -113,6 +113,7 @@
 	};
 
 	let load=async()=>{
+		$("list").dataset.filter="";
 		$("modal").classList.remove("hidden");
 		$("loading").classList.remove("hidden");
 		try{
@@ -126,10 +127,12 @@
 	};
 
 	let search=async()=>{
+		if(!$("q").value||$("q").value==="")$("list").dataset.filter="";
 		$("modal").classList.remove("hidden");
 		$("loading").classList.remove("hidden");
 		try{
 			let docs=await core.getList($("q").value);
+			$("list").dataset.filter="true";
 			viewList(docs);
 		}catch(e){
 			notify(e.message,"error");
@@ -171,8 +174,14 @@
 					else areaes.classList.add("hidden");
 				});
 			});
+			if(item.dataset.menu&&item.dataset.menu==="list")item.addEventListener("click",e=>{
+				if($("list").dataset.filter)load();
+			});
+			else if(item.dataset.menu&&item.dataset.menu==="search")item.addEventListener("click",e=>{
+				if($("q").value&&$("q").value!=="")search();
+			});
 		});
-		Array.prototype.forEach.call($q("[data-menu='list']"),e=>e.addEventListener("click",()=>load()))
+		Array.prototype.forEach.call($q("[data-menu='list']"),e=>e.addEventListener("dblclick",()=>load()))
 		$("menu_add").addEventListener("click",e=>{
 			$("t").value="";
 			$("add_window").classList.remove("hidden");

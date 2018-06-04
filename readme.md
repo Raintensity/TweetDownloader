@@ -3,6 +3,11 @@ Twitterのツイートをダウンロードするソフトウェア
 
 (A software to download some tweets.)
 
+## Download
+ビルド済みのファイルは、作者のブログからダウンロード出来ます。
+
+[ダウンロード先へ](https://blog.usx.jp/software/tweetdownloader/)
+
 ## Usage
 TwitterのBearerトークンは付属していないため、各自で取得してソースに入れる必要があります。
 
