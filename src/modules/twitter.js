@@ -46,10 +46,11 @@ const twitter={
 			else if(mediaObj[i].type==="video"||mediaObj[i].type==="animated_gif"){
 				let bitrate=-1;
 				for(let j=0;j<mediaObj[i].video_info.variants.length;j++){
-					if(!mediaObj[i].video_info.variants[j].bitrate)continue;
+					if(!mediaObj[i].video_info.variants[j].hasOwnProperty("bitrate"))continue;
 					if(mediaObj[i].video_info.variants[j].bitrate>bitrate)url=mediaObj[i].video_info.variants[j].url.split("?")[0];
 				}
 			}
+			console.log(url);
 			if(url)medias.push(this.$get(url,"binary").then(data=>Promise.resolve({name:url.split("/").pop().split(":")[0],data:data})));
 		}
 		return Promise.all(medias);
