@@ -33,7 +33,7 @@ const core={
 		let tweet=await db.search({_id:dataID});
 		if(tweet.length===0)throw new Error("Can't find the tweet on database.");
 		tweet=tweet[0];
-		for(let i=0;i<tweet.__media.length;i++){
+		if(tweet.__media)for(let i=0;i<tweet.__media.length;i++){
 			fs.unlinkSync(path+"/media/"+tweet.__media[i]);
 		}
 		await db.remove(dataID);
